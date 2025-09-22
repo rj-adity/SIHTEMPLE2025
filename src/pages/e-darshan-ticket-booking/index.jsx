@@ -39,7 +39,7 @@ const EDarshanTicketBooking = () => {
       id: 'dwarka-temple',
       name: 'Dwarkadhish Temple',
       location: 'Dwarka, Gujarat',
-      image: '/api/placeholder/300/200',
+      image: 'https://is.zobj.net/image-server/v1/images?r=O-HndYx03texUjmLtO8NO9cjWUoeAvoLtd5CQ3mBxxprww3u06f2XQs2jqaAEo2Oylg-Pt_X54HJb6sBHAmfge51ZHtCt6VAAEH37-Fx6E_i4bR8FkXjenraRJm0pX-hiY4EtcHC0fPUlZzZ5vFbf0meDgaFOBLU_g3M9icuLOLu51cInsZ48ofmp5Q1zdHkVeIrSKKTfemwfvphfxntdXtzHCcbuGw4rKtBL_hzLjdWZMuro-1CwhPwkvE',
       capacity: 500,
       openTime: '05:00',
       closeTime: '21:00',
@@ -49,22 +49,23 @@ const EDarshanTicketBooking = () => {
       id: 'somnath-temple',
       name: 'Somnath Temple',
       location: 'Somnath, Gujarat',
-      image: '/api/placeholder/300/200',
+      image: 'https://is.zobj.net/image-server/v1/images?r=9FJrXokpZDEIb4uza69c-ZOg9vR5bJfjnLfL-Ya5QIutvCFODqDzj94IFAbqj89v3nn-a8656DofsJEksTLVfeA3GykLdaa61kEFK4wIEXSIb8OFBK5ER2dGTjORHqAJFnrLNPpohehOGG2MQFFpsNvw_KObMcFuNPpuQH4tgKwpoX6lN3nxP7soDh88ZSlPbZpLO4Iq1i_UiWF1DSZSL-ydB2KujK3KIAvxFqdlcVNd3OzCmBTWPMEW0yc',
       capacity: 400,
       openTime: '06:00',
       closeTime: '20:00',
       ticketPrices: { regular: 30, vip: 150, senior: 15 }
     },
     {
-      id: 'jagannath-temple',
-      name: 'Jagannath Temple',
-      location: 'Puri, Odisha',
-      image: '/api/placeholder/300/200',
-      capacity: 600,
-      openTime: '05:30',
-      closeTime: '21:30',
-      ticketPrices: { regular: 75, vip: 250, senior: 35 }
-    }
+      id: 'pavagadh-temple',
+      name: 'Pavagadh Temple',
+      location: 'Pavagadh Hill, Gujarat',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPwn5B78JSphl3S32nVswhb3vhWsF9iFqZtA&s',
+      capacity: 400,
+      openTime: '05:00',
+      closeTime: '19:00',
+      ticketPrices: {regular: 50, vip: 150, senior: 25}
+
+    },
   ];
 
   // Generate available slots based on selected temple and date
@@ -87,17 +88,17 @@ const EDarshanTicketBooking = () => {
 
   const generateAvailableSlots = () => {
     if (!bookingData?.temple) return;
-    
+
     const slots = [];
     const temple = bookingData?.temple;
     const openHour = parseInt(temple?.openTime?.split(':')?.[0]);
     const closeHour = parseInt(temple?.closeTime?.split(':')?.[0]);
-    
+
     for (let hour = openHour; hour < closeHour; hour += 2) {
       const timeString = `${hour?.toString()?.padStart(2, '0')}:00`;
       const availability = Math.floor(Math.random() * 100) + 50; // 50-150 slots available
       const crowdLevel = availability > 120 ? 'low' : availability > 80 ? 'medium' : 'high';
-      
+
       slots?.push({
         time: timeString,
         available: availability,
@@ -106,7 +107,7 @@ const EDarshanTicketBooking = () => {
         waitTime: crowdLevel === 'high' ? 45 : crowdLevel === 'medium' ? 25 : 10
       });
     }
-    
+
     setAvailableSlots(slots);
   };
 
@@ -194,23 +195,23 @@ const EDarshanTicketBooking = () => {
               const IconComponent = step?.icon;
               const isActive = step?.id === bookingStep;
               const isCompleted = step?.id < bookingStep;
-              
+
               return (
                 <div key={step?.id} className="flex items-center">
                   <motion.div
                     initial={{ scale: 0.8 }}
-                    animate={{ 
+                    animate={{
                       scale: isActive ? 1.1 : 1,
-                      backgroundColor: isCompleted 
-                        ? 'var(--color-success)' 
-                        : isActive 
-                        ? 'var(--color-primary)' 
+                      backgroundColor: isCompleted
+                        ? 'var(--color-success)'
+                        : isActive
+                        ? 'var(--color-primary)'
                         : 'var(--color-muted)'
                     }}
                     className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      isCompleted 
-                        ? 'bg-success text-white' 
-                        : isActive 
+                      isCompleted
+                        ? 'bg-success text-white'
+                        : isActive
                         ? 'bg-primary text-white demo-glow' :'bg-muted text-muted-foreground'
                     }`}
                   >
@@ -229,7 +230,7 @@ const EDarshanTicketBooking = () => {
               );
             })}
           </div>
-          
+
           <div className="text-center">
             <h2 className="text-2xl font-bold text-primary mb-2">
               {steps?.[bookingStep - 1]?.title}

@@ -166,6 +166,16 @@ const Header = () => {
         {/* Logo Section */}
         <Logo />
 
+        {/* Homepage Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => window.location.href = '/'}
+          className="ml-4"
+        >
+          Home
+        </Button>
+
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center space-x-8">
           {navigationItems?.map((section) => (
@@ -174,7 +184,7 @@ const Header = () => {
                 getActiveSection() === section?.label 
                   ? 'bg-primary/10 text-primary' :'text-text-primary hover:bg-muted'
               }`}>
-                <span className="font-heading font-medium text-sm">{section?.label}</span>
+                <span className="font-heading font-medium text-sm" style={{ color: 'black' }}>{section?.label}</span>
               </div>
               
               {/* Dropdown Menu */}

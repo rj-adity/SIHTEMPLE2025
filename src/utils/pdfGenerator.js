@@ -126,13 +126,12 @@ export const generateTicketPDF = async (bookingData) => {
     yPosition += 6;
   });
 
-  // Generate real QR code with booking data
+  // Generate QR code with booking data (same as card)
   yPosition += 15;
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
   pdf.text('SCAN FOR ENTRY', 20, yPosition);
 
-  // Generate QR code with booking data
   const qrData = JSON.stringify({
     bookingId: bookingData?.id,
     temple: bookingData?.temple?.name,
@@ -157,7 +156,7 @@ export const generateTicketPDF = async (bookingData) => {
     yPosition += 10;
     const qrSize = 50;
     const qrX = (pageWidth - qrSize) / 2;
-    
+
     // Draw QR code image
     pdf.addImage(qrCodeDataURL, 'PNG', qrX, yPosition, qrSize, qrSize);
 

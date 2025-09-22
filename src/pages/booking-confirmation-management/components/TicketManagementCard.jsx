@@ -1,19 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Download, Share2, QrCode, MapPin, Clock, Users, IndianRupee, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import { downloadTicketPDF } from '../../../utils/pdfGenerator';
+import QRCode from 'qrcode';
 
 const TicketManagementCard = ({ bookingData, onDownload, onShare, onModify }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState(null);
+  const [qrCodeDataURL, setQrCodeDataURL] = useState(null);
+
+  // Generate QR code when component mounts (only once for mock data)
+  useEffect(() => {
+    const generateQRCode = async () => {
+      if (!bookingData?.id) return;
+
+      try {
+        const qrData = JSON.stringify({
+          bookingId: bookingData.id,
+          temple: bookingData.temple?.name,
+          date: bookingData.date,
+          timeSlot: bookingData.timeSlot,
+          ticketType: bookingData.ticketType,
+          tickets: bookingData.tickets
+        });
+
+        const qrCodeURL = await QRCode.toDataURL(qrData, {
+          width: 200,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
+        });
+
+        setQrCodeDataURL(qrCodeURL);
+      } catch (error) {
+        console.error('Error generating QR code:', error);
+      }
+    };
+
+    generateQRCode();
+  }, []); // Empty dependency array - generate only once on mount
 
   const handlePDFDownload = async () => {
     setIsDownloading(true);
     setDownloadStatus('processing');
 
     try {
-      const success = await downloadTicketPDF(bookingData);
+      // Generate QR code data URL synchronously for PDF
+      const qrData = JSON.stringify({
+        bookingId: bookingData?.id,
+        temple: bookingData?.temple?.name,
+        date: bookingData?.date,
+        timeSlot: bookingData?.timeSlot,
+        ticketType: bookingData?.ticketType,
+        tickets: bookingData?.tickets
+      });
+
+      const qrCodeDataURL = await QRCode.toDataURL(qrData, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+
+      // Attach QR code data URL to bookingData for PDF generation
+      const bookingDataWithQR = { ...bookingData, qrCodeDataURL };
+
+      const success = await downloadTicketPDF(bookingDataWithQR);
       if (success) {
         setDownloadStatus('success');
         setTimeout(() => setDownloadStatus(null), 3000);
@@ -94,6 +151,24 @@ const TicketManagementCard = ({ bookingData, onDownload, onShare, onModify }) =>
             <div className="text-white/80 text-sm">Booking ID</div>
           </div>
         </div>
+      </div>
+
+      {/* QR Code Section */}
+      <div className="p-6 border-t border-border flex justify-center">
+        {qrCodeDataURL ? (
+          <img
+            src={qrCodeDataURL}
+            alt="QR Code"
+            className="w-32 h-32"
+          />
+        ) : (
+          <div className="w-32 h-32 bg-muted flex items-center justify-center text-muted-foreground rounded-lg">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+              <div className="text-xs">Generating QR...</div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Content */}
