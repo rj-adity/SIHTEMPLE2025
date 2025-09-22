@@ -98,24 +98,10 @@ const BookingConfirmationManagement = () => {
     { id: 'services', label: 'Services', icon: Gift }
   ];
 
-  const handleTicketDownload = () => {
-    // Generate ticket download
-    const ticketData = {
-      bookingId: bookingData?.id,
-      temple: bookingData?.temple?.name,
-      date: bookingData?.date?.toLocaleDateString(),
-      time: bookingData?.timeSlot,
-      tickets: bookingData?.tickets,
-      devotees: bookingData?.devotees
-    };
-    
-    const element = document.createElement('a');
-    const file = new Blob([JSON.stringify(ticketData, null, 2)], { type: 'application/json' });
-    element.href = URL.createObjectURL(file);
-    element.download = `e-darshan-ticket-${bookingData?.id}.json`;
-    document.body?.appendChild(element);
-    element?.click();
-    document.body?.removeChild(element);
+  const handleTicketDownload = async () => {
+    // Import the PDF generator dynamically to avoid issues
+    const { downloadTicketPDF } = await import('../../utils/pdfGenerator');
+    await downloadTicketPDF(bookingData);
   };
 
   const handleBookingShare = async () => {

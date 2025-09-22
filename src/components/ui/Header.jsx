@@ -34,6 +34,18 @@ const Header = () => {
           path: '/emergency-response-center',
           icon: 'AlertTriangle',
           tooltip: 'Critical incident management and staff dispatch'
+        },
+        {
+          name: 'E-Darshan Booking',
+          path: '/e-darshan-ticket-booking',
+          icon: 'Calendar',
+          tooltip: 'Online darshan ticket booking system'
+        },
+        {
+          name: 'Booking Management',
+          path: '/booking-confirmation-management',
+          icon: 'CheckCircle',
+          tooltip: 'Manage and confirm darshan bookings'
         }
       ]
     },

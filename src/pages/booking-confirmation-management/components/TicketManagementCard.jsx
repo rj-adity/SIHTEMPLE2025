@@ -1,14 +1,240 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Download, Share2, QrCode, MapPin, Clock, Users, IndianRupee, CheckCircle, AlertCircle, FileText } from 'lucide-react';
+import Button from '../../../components/ui/Button';
+import { downloadTicketPDF } from '../../../utils/pdfGenerator';
 
-const TicketManagementCard = () => {
-  React.useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.warn('Placeholder: TicketManagementCard is not implemented yet.');
-  }, []);
+const TicketManagementCard = ({ bookingData, onDownload, onShare, onModify }) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState(null);
+
+  const handlePDFDownload = async () => {
+    setIsDownloading(true);
+    setDownloadStatus('processing');
+
+    try {
+      const success = await downloadTicketPDF(bookingData);
+      if (success) {
+        setDownloadStatus('success');
+        setTimeout(() => setDownloadStatus(null), 3000);
+      } else {
+        setDownloadStatus('error');
+        setTimeout(() => setDownloadStatus(null), 3000);
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
+      setDownloadStatus('error');
+      setTimeout(() => setDownloadStatus(null), 3000);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const formatDate = (date) => {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('en-IN', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formatTime = (timeSlot) => {
+    if (!timeSlot) return 'N/A';
+    return timeSlot;
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'confirmed':
+        return 'text-success bg-success/10 border-success';
+      case 'pending':
+        return 'text-warning bg-warning/10 border-warning';
+      case 'cancelled':
+        return 'text-error bg-error/10 border-error';
+      default:
+        return 'text-muted-foreground bg-muted/10 border-muted';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'confirmed':
+        return <CheckCircle className="h-4 w-4" />;
+      case 'pending':
+        return <Clock className="h-4 w-4" />;
+      case 'cancelled':
+        return <AlertCircle className="h-4 w-4" />;
+      default:
+        return <FileText className="h-4 w-4" />;
+    }
+  };
+
   return (
-    <>
-  { /*TicketManagementCard */} 
- </>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-card rounded-xl sacred-shadow-lg border border-border overflow-hidden"
+    >
+      {/* Header */}
+      <div className="bg-black p-6 text-white">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+              <QrCode className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-heading font-bold">E-Darshan Ticket</h2>
+              <p className="text-white/80 text-sm">Booking Confirmation</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-mono font-bold">{bookingData?.id}</div>
+            <div className="text-white/80 text-sm">Booking ID</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-6 space-y-6">
+        {/* Status Badge */}
+        <div className="flex items-center justify-between">
+          <div className={`flex items-center space-x-2 px-3 py-1 rounded-full border ${getStatusColor(bookingData?.status)}`}>
+            {getStatusIcon(bookingData?.status)}
+            <span className="text-sm font-medium capitalize">{bookingData?.status}</span>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            Booked on {new Date(bookingData?.createdAt).toLocaleDateString()}
+          </div>
+        </div>
+
+        {/* Temple Information */}
+        <div className="bg-surface rounded-lg p-4 space-y-3">
+          <div className="flex items-start space-x-3">
+            <MapPin className="h-5 w-5 text-primary mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-lg">{bookingData?.temple?.name}</h3>
+              <p className="text-muted-foreground">{bookingData?.temple?.location}</p>
+              <p className="text-sm text-muted-foreground">{bookingData?.temple?.contact}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Visit Details */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-surface rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <Clock className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Visit Date & Time</span>
+            </div>
+            <div className="text-lg font-semibold">{formatDate(bookingData?.date)}</div>
+            <div className="text-primary font-medium">{formatTime(bookingData?.timeSlot)}</div>
+          </div>
+
+          <div className="bg-surface rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <Users className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Devotees</span>
+            </div>
+            <div className="text-lg font-semibold">{bookingData?.tickets} Person(s)</div>
+            <div className="text-sm text-muted-foreground">{bookingData?.ticketType}</div>
+          </div>
+        </div>
+
+        {/* Payment Information */}
+        <div className="bg-surface rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <IndianRupee className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Total Amount</span>
+            </div>
+            <div className="text-xl font-bold text-primary">₹{bookingData?.amount}</div>
+          </div>
+          <div className="mt-2 text-sm text-success font-medium">
+            ✓ {bookingData?.paymentStatus?.toUpperCase()}
+          </div>
+        </div>
+
+        {/* Devotee List */}
+        {bookingData?.devotees && bookingData?.devotees?.length > 0 && (
+          <div className="bg-surface rounded-lg p-4">
+            <h4 className="font-medium mb-3">Devotee Details</h4>
+            <div className="space-y-2">
+              {bookingData?.devotees?.map((devotee, index) => (
+                <div key={index} className="flex items-center justify-between py-2 border-b border-border last:border-b-0">
+                  <span className="font-medium">{devotee?.name}</span>
+                  <span className="text-sm text-muted-foreground">Age: {devotee?.age}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
+          <Button
+            onClick={handlePDFDownload}
+            disabled={isDownloading}
+            className="flex-1 flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90"
+          >
+            {isDownloading ? (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="h-4 w-4 border-2 border-white border-t-transparent rounded-full"
+              />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            <span>
+              {isDownloading
+                ? 'Generating PDF...'
+                : downloadStatus === 'success'
+                  ? 'PDF Downloaded!'
+                  : downloadStatus === 'error'
+                    ? 'Download Failed'
+                    : 'Download PDF Ticket'
+              }
+            </span>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={onShare}
+            className="flex-1 flex items-center justify-center space-x-2"
+          >
+            <Share2 className="h-4 w-4" />
+            <span>Share Booking</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={onModify}
+            className="flex-1 flex items-center justify-center space-x-2"
+          >
+            <QrCode className="h-4 w-4" />
+            <span>Modify</span>
+          </Button>
+        </div>
+
+        {/* Important Notes */}
+        <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
+          <div className="flex items-start space-x-2">
+            <AlertCircle className="h-4 w-4 text-warning mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-warning mb-1">Important Notes:</p>
+              <ul className="text-warning/80 space-y-1">
+                <li>• Please arrive 30 minutes before your scheduled time</li>
+                <li>• Carry a valid photo ID for verification</li>
+                <li>• This ticket is valid only for the specified date and time</li>
+                <li>• Follow temple guidelines and maintain decorum</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 
