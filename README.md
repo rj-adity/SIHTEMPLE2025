@@ -39,13 +39,14 @@ Temples often face **overcrowding** during festivals, special ceremonies, or wee
 ## 🖼️ Screenshots
 
 ### Dashboard (Live Metrics)
-![Dashboard Screenshot](https://github.com/user-attachments/assets/81d0f287-f229-48c3-aa8b-7237432517cf)
+<img src="https://github.com/user-attachments/assets/81d0f287-f229-48c3-aa8b-7237432517cf" width="800" />
 
 ### Analytics & Trends
-![Analytics Screenshot](https://github.com/user-attachments/assets/38bca5c5-370e-46d7-bd9e-285aaff61695)
+<img src="https://github.com/user-attachments/assets/38bca5c5-370e-46d7-bd9e-285aaff61695" width="800" />
 
 ### Temple Selector
-![Temple Selector](https://github.com/user-attachments/assets/28f684ae-1cdc-49c2-acf7-c30940cb1c30)
+<img src="https://github.com/user-attachments/assets/28f684ae-1cdc-49c2-acf7-c30940cb1c30" width="800" />
+
 
 
 
