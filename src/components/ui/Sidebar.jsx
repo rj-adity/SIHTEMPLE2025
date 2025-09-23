@@ -27,6 +27,18 @@ const Sidebar = ({ isCollapsed = false, onToggle }) => {
 
   const navigationSections = [
     {
+      title: 'SIH Showcase',
+      items: [
+        {
+          name: 'SIH Demo Showcase',
+          path: '/sih-demo-showcase',
+          icon: 'Play',
+          description: 'Smart India Hackathon demonstration',
+          badge: 'Demo'
+        }
+      ]
+    },
+    {
       title: 'Operations Center',
       items: [
         {
