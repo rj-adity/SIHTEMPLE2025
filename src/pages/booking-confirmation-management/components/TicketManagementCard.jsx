@@ -10,19 +10,54 @@ const TicketManagementCard = ({ bookingData, onDownload, onShare, onModify }) =>
   const [downloadStatus, setDownloadStatus] = useState(null);
   const [qrCodeDataURL, setQrCodeDataURL] = useState(null);
 
+  const toBase64Unicode = (str) => {
+    try {
+      return btoa(unescape(encodeURIComponent(str)));
+    } catch {
+      return btoa(str);
+    }
+  };
+
+  const buildStaticTicketHTML = () => {
+    const allowed = (bookingData?.paymentStatus || '').toLowerCase() === 'paid';
+    const bg = bookingData?.temple?.image || bookingData?.temple?.preview || '';
+    return `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Ticket ${bookingData?.id}</title>
+    <style>body{margin:0;background:#f6f2ea;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial} .card{max-width:420px;margin:0 auto;padding:16px}
+    .box{border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.12);background:#fff}
+    .hdr{height:160px;color:#fff;background-image:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),url('${bg}');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:space-between;padding:16px}
+    .mono{font-family:monospace;font-weight:700}
+    .name{font-size:20px;font-weight:700;margin:12px 0 6px}
+    .chip{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid ${allowed ? 'rgba(16,185,129,.35)' : 'rgba(245,158,11,.35)'};color:${allowed ? '#0a7d32' : '#b45309'};background:${allowed ? 'rgba(16,185,129,.12)' : 'rgba(245,158,11,.12)'} }
+    .row{padding:0 16px 16px}
+    .meta{color:#555;font-size:14px;line-height:1.6}
+    </style></head><body><div class=card><div class=box>
+    <div class=hdr><div><div style="font-weight:700;font-size:18px">E‑Darshan Ticket</div><div style="opacity:.8">Booking Confirmation</div></div><div class=mono>${bookingData?.id}</div></div>
+    <div class=row>
+      <div class=name>${bookingData?.devoteeName || 'Devotee'}</div>
+      <div class=chip>${allowed ? 'ALLOWED' : 'NOT ALLOWED'}</div>
+      <div class=meta style="margin-top:12px">
+        <div><b>Temple:</b> ${bookingData?.temple?.name || ''}</div>
+        <div><b>Date:</b> ${new Date(bookingData?.date || Date.now()).toLocaleDateString()}</div>
+        <div><b>Time:</b> ${bookingData?.timeSlot || ''}</div>
+        <div><b>Tickets:</b> ${bookingData?.tickets || 1} (${bookingData?.ticketType || ''})</div>
+        <div><b>Amount:</b> ₹${bookingData?.amount || 0}</div>
+      </div>
+    </div>
+    </div></div></body></html>`;
+  };
+
   // Generate QR code when component mounts (only once for mock data)
   useEffect(() => {
     const generateQRCode = async () => {
       if (!bookingData?.id) return;
 
       try {
+        // Use simple JSON data like the server does
         const qrData = JSON.stringify({
-          bookingId: bookingData.id,
-          temple: bookingData.temple?.name,
-          date: bookingData.date,
-          timeSlot: bookingData.timeSlot,
-          ticketType: bookingData.ticketType,
-          tickets: bookingData.tickets
+          id: bookingData.id,
+          status: bookingData.paymentStatus,
+          name: bookingData.devoteeName,
+          temple: bookingData.temple?.name
         });
 
         const qrCodeURL = await QRCode.toDataURL(qrData, {
@@ -48,29 +83,36 @@ const TicketManagementCard = ({ bookingData, onDownload, onShare, onModify }) =>
     setDownloadStatus('processing');
 
     try {
-      // Generate QR code data URL synchronously for PDF
-      const qrData = JSON.stringify({
-        bookingId: bookingData?.id,
-        temple: bookingData?.temple?.name,
-        date: bookingData?.date,
-        timeSlot: bookingData?.timeSlot,
-        ticketType: bookingData?.ticketType,
-        tickets: bookingData?.tickets
-      });
+      console.log('Starting PDF download for booking:', bookingData);
+      
+      // Ensure we have valid booking data
+      if (!bookingData) {
+        throw new Error('No booking data available');
+      }
 
-      const qrCodeDataURL = await QRCode.toDataURL(qrData, {
-        width: 200,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      });
+      // Prepare booking data for PDF generation
+      const pdfBookingData = {
+        id: bookingData.id || `TEMP-${Date.now()}`,
+        temple: {
+          name: bookingData.temple?.name || 'Temple',
+          location: bookingData.temple?.location || 'Location',
+          contact: bookingData.temple?.contact || 'Contact',
+          image: bookingData.temple?.image || bookingData.temple?.preview
+        },
+        date: bookingData.date ? new Date(bookingData.date) : new Date(),
+        timeSlot: bookingData.timeSlot || '10:00 AM',
+        ticketType: bookingData.ticketType || 'Regular Darshan',
+        tickets: bookingData.tickets || 1,
+        amount: bookingData.amount || 0,
+        status: bookingData.status || 'confirmed',
+        devotees: bookingData.devotees || [{ name: bookingData.devoteeName || 'Devotee', age: 30 }],
+        devoteeName: bookingData.devoteeName || 'Devotee',
+        paymentStatus: bookingData.paymentStatus || 'paid'
+      };
 
-      // Attach QR code data URL to bookingData for PDF generation
-      const bookingDataWithQR = { ...bookingData, qrCodeDataURL };
+      console.log('Prepared booking data for PDF:', pdfBookingData);
 
-      const success = await downloadTicketPDF(bookingDataWithQR);
+      const success = await downloadTicketPDF(pdfBookingData);
       if (success) {
         setDownloadStatus('success');
         setTimeout(() => setDownloadStatus(null), 3000);
@@ -82,6 +124,7 @@ const TicketManagementCard = ({ bookingData, onDownload, onShare, onModify }) =>
       console.error('Download failed:', error);
       setDownloadStatus('error');
       setTimeout(() => setDownloadStatus(null), 3000);
+      alert(`PDF download failed: ${error.message}`);
     } finally {
       setIsDownloading(false);
     }
@@ -100,6 +143,15 @@ const TicketManagementCard = ({ bookingData, onDownload, onShare, onModify }) =>
   const formatTime = (timeSlot) => {
     if (!timeSlot) return 'N/A';
     return timeSlot;
+  };
+
+  const formatINR = (amount) => {
+    if (amount == null) return '₹0';
+    try {
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Number(amount));
+    } catch {
+      return `₹${amount}`;
+    }
   };
 
   const getStatusColor = (status) => {
@@ -134,8 +186,18 @@ const TicketManagementCard = ({ bookingData, onDownload, onShare, onModify }) =>
       animate={{ opacity: 1, y: 0 }}
       className="bg-card rounded-xl sacred-shadow-lg border border-border overflow-hidden"
     >
-      {/* Header */}
-      <div className="bg-black p-6 text-white">
+      {/* Header with temple background */}
+      <div
+        className="p-6 text-white relative"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.6)), url(${bookingData?.temple?.image || bookingData?.temple?.preview || ''})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          imageRendering: 'crisp-edges',
+          WebkitImageRendering: 'crisp-edges'
+        }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
@@ -153,22 +215,34 @@ const TicketManagementCard = ({ bookingData, onDownload, onShare, onModify }) =>
         </div>
       </div>
 
-      {/* QR Code Section */}
-      <div className="p-6 border-t border-border flex justify-center">
-        {qrCodeDataURL ? (
-          <img
-            src={qrCodeDataURL}
-            alt="QR Code"
-            className="w-32 h-32"
-          />
-        ) : (
-          <div className="w-32 h-32 bg-muted flex items-center justify-center text-muted-foreground rounded-lg">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-              <div className="text-xs">Generating QR...</div>
-            </div>
+      {/* Primary ticket details with QR moved to the right on desktop */}
+      <div className="p-6 border-t border-border">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+          <div className="md:col-span-2 space-y-2">
+            <div className="text-sm text-white/80">Devotee Name</div>
+            <div className="text-2xl font-semibold">{bookingData?.devoteeName || 'Devotee'}</div>
           </div>
-        )}
+
+          <div className="flex md:justify-end justify-center">
+            {qrCodeDataURL ? (
+              <div className="bg-white p-3 rounded-lg shadow-lg border-2 border-primary/20">
+                <img
+                  src={qrCodeDataURL}
+                  alt="QR Code"
+                  className="w-36 h-36 md:w-40 md:h-40"
+                />
+                <p className="text-xs text-center text-muted-foreground mt-2">Scan for entry</p>
+              </div>
+            ) : (
+              <div className="w-36 h-36 md:w-40 md:h-40 bg-muted flex items-center justify-center text-muted-foreground rounded-lg border-2 border-dashed border-muted-foreground/30">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                  <div className="text-xs">Generating QR...</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Content */}
@@ -224,7 +298,7 @@ const TicketManagementCard = ({ bookingData, onDownload, onShare, onModify }) =>
               <IndianRupee className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium">Total Amount</span>
             </div>
-            <div className="text-xl font-bold text-primary">₹{bookingData?.amount}</div>
+            <div className="text-xl font-bold text-primary">{formatINR(bookingData?.amount)}</div>
           </div>
           <div className="mt-2 text-sm text-success font-medium">
             ✓ {bookingData?.paymentStatus?.toUpperCase()}

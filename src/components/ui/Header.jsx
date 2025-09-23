@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { SignInButton, SignUpButton, UserButton, useUser, useAuth } from '@clerk/clerk-react';
 import Icon from '../AppIcon';
 import Button from './Button';
 
 const Header = () => {
   const location = useLocation();
+  const { isLoaded, isSignedIn, user } = useUser();
+  const { signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [realTimeStatus, setRealTimeStatus] = useState('connected');
   const [alertCount, setAlertCount] = useState(3);
@@ -139,6 +142,46 @@ const Header = () => {
     </Button>
   );
 
+  const AuthenticationSection = () => {
+    if (!isLoaded) {
+      return (
+        <div className="hidden md:flex items-center space-x-2">
+          <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />
+        </div>
+      );
+    }
+
+    if (isSignedIn) {
+      return (
+        <div className="hidden md:flex items-center space-x-2">
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "w-8 h-8"
+              }
+            }}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="hidden md:flex items-center space-x-2">
+        <SignInButton mode="modal">
+          <Button variant="outline" size="sm">
+            Sign In
+          </Button>
+        </SignInButton>
+        <SignUpButton mode="modal">
+          <Button size="sm" className="sw1049-gradient text-white hover:opacity-90">
+            Sign Up
+          </Button>
+        </SignUpButton>
+      </div>
+    );
+  };
+
   const QuickActionToolbar = () => (
     <div className="hidden md:flex items-center space-x-2">
       <Button
@@ -215,6 +258,7 @@ const Header = () => {
         <div className="flex items-center space-x-4">
           <RealTimeStatusIndicator />
           <AlertNotificationCenter />
+          <AuthenticationSection />
           <QuickActionToolbar />
 
           {/* Mobile Menu Button */}

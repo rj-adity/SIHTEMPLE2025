@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
+import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 import ScrollToTop from "components/ScrollToTop";
 import ErrorBoundary from "components/ErrorBoundary";
 import NotFound from "pages/NotFound";
@@ -10,6 +11,8 @@ import CrowdAnalyticsDashboard from './pages/crowd-analytics-dashboard';
 import SIHDemoShowcase from './pages/sih-demo-showcase';
 import EDarshanTicketBooking from './pages/e-darshan-ticket-booking';
 import BookingConfirmationManagement from './pages/booking-confirmation-management';
+import PaymentSuccess from './pages/PaymentSuccess';
+import TicketView from './pages/ticket-view';
 
 const Routes = () => {
   return (
@@ -24,8 +27,22 @@ const Routes = () => {
         <Route path="/emergency-response-center" element={<EmergencyResponseCenter />} />
         <Route path="/crowd-analytics-dashboard" element={<CrowdAnalyticsDashboard />} />
         <Route path="/sih-demo-showcase" element={<SIHDemoShowcase />} />
-        <Route path="/e-darshan-ticket-booking" element={<EDarshanTicketBooking />} />
-        <Route path="/booking-confirmation-management" element={<BookingConfirmationManagement />} />
+        <Route path="/e-darshan-ticket-booking" element={
+          <SignedIn>
+            <EDarshanTicketBooking />
+          </SignedIn>
+        } />
+        <Route path="/booking-confirmation-management" element={
+          <SignedIn>
+            <BookingConfirmationManagement />
+          </SignedIn>
+        } />
+        <Route path="/payment-success" element={
+          <SignedIn>
+            <PaymentSuccess />
+          </SignedIn>
+        } />
+        <Route path="/ticket/:id" element={<TicketView />} />
         <Route path="*" element={<NotFound />} />
       </RouterRoutes>
       </ErrorBoundary>

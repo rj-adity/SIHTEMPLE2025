@@ -90,3 +90,89 @@ npm run dev
 
 # Build for production
 npm run build
+
+---
+
+## 📁 Frontend Folder Structure
+
+This section outlines the complete structure of the `client/` directory, which is the frontend part of the Temple Crowd Management application. The structure is organized for a React-based application using Vite as the build tool.
+
+### Root Level Files
+- `.gitignore` - Git ignore rules
+- `eslint.config.js` - ESLint configuration
+- `index.html` - Main HTML entry point
+- `jsconfig.json` - JavaScript configuration
+- `package.json` - Dependencies and scripts
+- `postcss.config.js` - PostCSS configuration
+- `QR_IMPLEMENTATION_README.md` - QR code implementation documentation
+- `QR_TEST_README.md` - QR code testing documentation
+- `qr-test.html` - QR testing page
+- `README.md` - This file (project documentation)
+- `simple-qr-test.html` - Simple QR test page
+- `tailwind.config.js` - Tailwind CSS configuration
+- `TODO.md` - Task list and development notes
+- `vercel.json` - Vercel deployment configuration
+- `vite.config.mjs` - Vite configuration
+
+### `public/` Directory
+Contains static assets served directly by Vite:
+- `_redirects` - Redirect rules for deployment
+- `manifest.json` - Web app manifest
+- `vite.svg` - Vite logo
+- `assets/images/no_images.png` - Default image placeholder
+
+### `src/` Directory
+Main source code directory:
+
+#### Core Files
+- `App.jsx` - Main application component
+- `index.jsx` - Application entry point
+- `Routes.jsx` - Route definitions
+
+#### `components/` Directory
+Reusable UI components:
+- `AppIcon.jsx` - Icon component
+- `AppImage.jsx` - Image component
+- `ErrorBoundary.jsx` - Error boundary component
+- `ScrollToTop.jsx` - Scroll to top utility
+- `ui/` - UI components:
+  - `Button.jsx`, `Checkbox.jsx`, `Header.jsx`, `Input.jsx`, `Select.jsx`, `Sidebar.jsx`
+
+#### `pages/` Directory
+Page components organized by feature:
+
+- `NotFound.jsx` - 404 error page
+- `booking-confirmation-management/` - Booking management feature:
+  - `index.jsx` - Main page
+  - `components/` - Related components (e.g., `AdditionalServicesBooking.jsx`, `BookingManagementHeader.jsx`, `BookingModificationModal.jsx`, `FeedbackSubmissionModal.jsx`, `LiveTempleUpdates.jsx`, `NavigationAssistance.jsx`, `TicketManagementCard.jsx`, `VisitPreparationChecklist.jsx`)
+- `crowd-analytics-dashboard/` - Analytics dashboard:
+  - `index.jsx` - Main page
+  - `components/` - Dashboard components (e.g., `FilterControls.jsx`, `HeatMapVisualization.jsx`, `MetricsStrip.jsx`, `MLPredictionPanel.jsx`, `PredictiveForecast.jsx`, `SeasonalTrendsChart.jsx`)
+- `e-darshan-ticket-booking/` - Ticket booking:
+  - `index.jsx` - Main page
+  - `components/` - Booking components (e.g., `BookingConfirmation.jsx`, `BookingHeader.jsx`, `DarshanBookingForm.jsx`, `DevoteeDetailsForm.jsx`, `PaymentIntegration.jsx`, `TempleSelector.jsx`, `TicketSelection.jsx`)
+- `emergency-response-center/` - Emergency management:
+  - `index.jsx` - Main page
+  - `components/` - Emergency components (e.g., `AlertBanner.jsx`, `CrowdDensityHeatMap.jsx`, `IncidentTimeline.jsx`, `QuickActionPanel.jsx`, `StaffDispatchTracker.jsx`, `StatusMetricsRow.jsx`)
+- `financial-analytics-hub/` - Financial analytics:
+  - `index.jsx` - Main page
+  - `components/` - Financial components (e.g., `DonationMethodChart.jsx`, `FestivalImpactAnalysis.jsx`, `FinancialKPICard.jsx`, `RecurringDonationsMetrics.jsx`, `RevenueChart.jsx`, `RevenueForecasting.jsx`, `SeasonalTrendAnalysis.jsx`, `TopDonorsPanel.jsx`)
+- `qr-test/` - QR testing:
+  - `index.jsx` - Main page
+- `sih-demo-showcase/` - Demo showcase:
+  - `index.jsx` - Main page
+  - `components/` - Demo components (e.g., `DemoControlPanel.jsx`, `DemoHeader.jsx`, `DemoNarrative.jsx`, `LiveMetricsTicker.jsx`, `MainVisualization.jsx`)
+- `temple-operations-overview/` - Operations overview:
+  - `index.jsx` - Main page
+  - `components/` - Overview components (e.g., `GlobalControlPanel.jsx`, `KPIMetricCard.jsx`, `LiveAlertFeed.jsx`, `PredictionChart.jsx`, `TempleStatusGrid.jsx`)
+
+#### `styles/` Directory
+- `index.css` - Main CSS file
+- `tailwind.css` - Tailwind CSS imports
+
+#### `utils/` Directory
+Utility functions:
+- `cn.js` - Utility for class names
+- `pdfGenerator.js` - PDF generation utility
+- `qrTest.js` - QR testing utility
+- `qrTestFixed.js` - Fixed QR testing utility

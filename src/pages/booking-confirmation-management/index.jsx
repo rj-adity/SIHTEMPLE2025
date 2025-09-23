@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ticket, QrCode, Download, Share2, Edit, CheckCircle, Navigation, Star, Gift, RefreshCw } from 'lucide-react';
+import { Ticket, QrCode, Download, Share2, Edit, CheckCircle, Navigation, Star, Gift, RefreshCw, Loader2 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import BookingManagementHeader from './components/BookingManagementHeader';
 import LiveTempleUpdates from './components/LiveTempleUpdates';
@@ -16,31 +16,9 @@ const BookingConfirmationManagement = () => {
   const [showModifyModal, setShowModifyModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
-
-  // Mock booking data - in real app this would come from API
-  const bookingData = {
-    id: 'SW1049123456',
-    temple: {
-      name: 'Dwarkadhish Temple',
-      location: 'Dwarka, Gujarat',
-      image: '/api/placeholder/400/300',
-      contact: '+91-2892-234567',
-      gpsCoords: { lat: 22.2587, lng: 68.9678 }
-    },
-    date: new Date(Date.now() + 86400000), // Tomorrow
-    timeSlot: '10:00 AM',
-    tickets: 3,
-    ticketType: 'VIP Darshan',
-    amount: 600,
-    status: 'confirmed',
-    devotees: [
-      { name: 'Rahul Sharma', age: 35 },
-      { name: 'Priya Sharma', age: 32 },
-      { name: 'Aarav Sharma', age: 8 }
-    ],
-    paymentStatus: 'completed',
-    createdAt: new Date(Date.now() - 3600000) // 1 hour ago
-  };
+  const [bookingData, setBookingData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [liveUpdates, setLiveUpdates] = useState({
     crowdLevel: 'medium',
@@ -64,6 +42,68 @@ const BookingConfirmationManagement = () => {
     }, 30000); // Update every 30 seconds
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Fetch booking data from API
+  useEffect(() => {
+    const fetchBookingData = async () => {
+      try {
+        setLoading(true);
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        const response = await fetch(`${apiBase}/bookings`, {
+          headers: {
+            'Authorization': `Bearer ${await window.Clerk?.session?.getToken()}`
+          }
+        });
+
+        if (response.ok) {
+          const tickets = await response.json();
+          console.log('API Response:', tickets); // Debug log
+
+          // Get the latest booking
+          const latestBooking = tickets[tickets.length - 1];
+          if (latestBooking) {
+            console.log('Latest booking:', latestBooking); // Debug log
+
+            const ticketCounts = latestBooking.tickets || { regular: 0, vip: 0, senior: 0 };
+            const totalPersons = (ticketCounts.regular || 0) + (ticketCounts.vip || 0) + (ticketCounts.senior || 0) || 1;
+            const chosenType =
+              (ticketCounts.vip ? 'VIP Darshan' : (ticketCounts.regular ? 'Standard Darshan' : (ticketCounts.senior ? 'Senior Citizen' : 'Standard Darshan')));
+
+            setBookingData({
+              id: latestBooking._id || `SW1049${Date.now().toString().slice(-6)}`,
+              temple: latestBooking.temple || {
+                name: 'Temple Name',
+                location: 'Temple Location',
+                contact: '+91-XXXX-XXXXXX'
+              },
+              devoteeName: latestBooking.devoteeName || 'Devotee',
+              date: latestBooking.createdAt ? new Date(latestBooking.createdAt) : new Date(),
+              timeSlot: '10:00 AM',
+              tickets: totalPersons,
+              ticketType: chosenType,
+              amount: latestBooking.totalPrice || 0,
+              status: latestBooking.paymentStatus === 'paid' ? 'confirmed' : 'pending',
+              paymentStatus: latestBooking.paymentStatus || 'pending',
+              createdAt: latestBooking.createdAt || new Date()
+            });
+          } else {
+            setError('No booking data found. Please complete a booking first.');
+          }
+        } else {
+          const errorData = await response.json();
+          console.error('API Error:', errorData);
+          throw new Error(`Failed to fetch booking data: ${response.status}`);
+        }
+      } catch (err) {
+        console.error('Error fetching booking data:', err);
+        setError('Failed to load booking data. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookingData();
   }, []);
 
   // Mock notifications
@@ -178,14 +218,48 @@ const BookingConfirmationManagement = () => {
     }
   };
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-surface to-muted flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading your booking details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-surface to-muted flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-card rounded-lg sacred-shadow p-8 text-center">
+          <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-error text-2xl">⚠️</span>
+          </div>
+          <h2 className="text-xl font-bold text-error mb-4">Error Loading Booking</h2>
+          <p className="text-muted-foreground mb-6">{error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="w-full sw1049-gradient text-white"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-surface to-muted">
       {/* Header */}
-      <BookingManagementHeader 
+      <BookingManagementHeader
         bookingData={bookingData}
         notifications={notifications}
         onNotificationRead={(id) => {
-          setNotifications(prev => 
+          setNotifications(prev =>
             prev?.map(n => n?.id === id ? { ...n, read: true } : n)
           );
         }}
