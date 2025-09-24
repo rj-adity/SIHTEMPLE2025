@@ -1,15 +1,15 @@
 // src/utils/api.js
 
 import axios from "axios";
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 /**
  * Fetch all temples
  */
 export async function fetchTemples() {
   try {
-    const res = await fetch(`${BASE_URL}/temples`);
+    const res = await fetch(`${BASE_URL}/api/temples`);
     if (!res.ok) throw new Error("Failed to fetch temples");
     return await res.json();
   } catch (err) {
@@ -28,7 +28,7 @@ export const createTicket = async (templeId, formData, tickets) => {
       age: formData?.primaryDevotee?.age,
       tickets
     };
-    const response = await axios.post(`${API_URL}/payments/checkout`, payload);
+    const response = await axios.post(`${API_URL}/api/payments/checkout`, payload);
     return response.data?.url || null; // Stripe checkout URL
   } catch (err) {
     const message = err?.response?.data?.message || err?.message || 'Failed to create checkout session';
@@ -44,7 +44,7 @@ export const createTicket = async (templeId, formData, tickets) => {
  */
 export async function incrementVisitor(templeId) {
   try {
-    const res = await fetch(`${BASE_URL}/temples/${templeId}/visit`, {
+    const res = await fetch(`${BASE_URL}/api/temples/${templeId}/visit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     });
@@ -62,7 +62,7 @@ export async function incrementVisitor(templeId) {
  */
 export async function createCheckoutSession(templeId, tickets) {
   try {
-    const res = await fetch(`${BASE_URL}/payments/checkout`, {
+    const res = await fetch(`${BASE_URL}/api/payments/checkout`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ templeId, tickets }),
@@ -81,7 +81,7 @@ export async function createCheckoutSession(templeId, tickets) {
  */
 export async function bookTicket(token, payload) {
   try {
-    const res = await fetch(`${BASE_URL}/bookings`, {
+    const res = await fetch(`${BASE_URL}/api/bookings`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -102,7 +102,7 @@ export async function bookTicket(token, payload) {
  */
 export async function createBooking(templeId, formData, tickets) {
   try {
-    const res = await fetch(`${BASE_URL}/bookings`, {
+    const res = await fetch(`${BASE_URL}/api/bookings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ templeId, formData, tickets })
@@ -120,7 +120,7 @@ export async function createBooking(templeId, formData, tickets) {
  */
 export async function getBooking(id) {
   try {
-    const res = await fetch(`${BASE_URL}/bookings/${id}`);
+    const res = await fetch(`${BASE_URL}/api/bookings/${id}`);
     if (!res.ok) throw new Error("Failed to fetch booking");
     return await res.json();
   } catch (err) {
