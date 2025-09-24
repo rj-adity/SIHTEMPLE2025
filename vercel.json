@@ -20,6 +20,6 @@
     }
   ],
   "env": {
-    "VITE_API_URL": "https://your-backend-url.vercel.app"
+    "VITE_API_URL": "https://sihtemple-2025backend-n3s0p0cq1-rj-aditys-projects.vercel.app"
   }
 }
