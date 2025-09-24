@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getApiUrl } from '../../utils/api';
 
 const TicketView = () => {
   const { id } = useParams();
@@ -10,8 +11,7 @@ const TicketView = () => {
   useEffect(() => {
     const fetchTicket = async () => {
       try {
-        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-        const res = await fetch(`${apiBase}/bookings/${id}`);
+        const res = await fetch(getApiUrl(`/bookings/${id}`));
         if (!res.ok) throw new Error('Failed to fetch ticket');
         const data = await res.json();
         setTicket(data);

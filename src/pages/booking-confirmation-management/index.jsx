@@ -10,6 +10,7 @@ import VisitPreparationChecklist from './components/VisitPreparationChecklist';
 import AdditionalServicesBooking from './components/AdditionalServicesBooking';
 import BookingModificationModal from './components/BookingModificationModal';
 import FeedbackSubmissionModal from './components/FeedbackSubmissionModal';
+import { getApiUrl } from '../../utils/api';
 
 const BookingConfirmationManagement = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -49,8 +50,7 @@ const BookingConfirmationManagement = () => {
     const fetchBookingData = async () => {
       try {
         setLoading(true);
-        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-        const response = await fetch(`${apiBase}/bookings`, {
+        const response = await fetch(getApiUrl('/bookings'), {
           headers: {
             'Authorization': `Bearer ${await window.Clerk?.session?.getToken()}`
           }

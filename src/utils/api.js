@@ -1,15 +1,29 @@
 // src/utils/api.js
 
 import axios from "axios";
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
+
+// Smart API URL builder that handles duplicate /api prefixes
+export const getApiUrl = (endpoint = '') => {
+  const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
+  
+  // If baseUrl already ends with /api, don't add another /api
+  if (baseUrl.endsWith('/api')) {
+    return `${baseUrl}${endpoint}`;
+  }
+  
+  // If baseUrl doesn't end with /api, add it
+  return `${baseUrl}/api${endpoint}`;
+};
+
+const BASE_URL = getApiUrl();
+const API_URL = getApiUrl();
 
 /**
  * Fetch all temples
  */
 export async function fetchTemples() {
   try {
-    const res = await fetch(`${BASE_URL}/api/temples`);
+    const res = await fetch(getApiUrl('/temples'));
     if (!res.ok) throw new Error("Failed to fetch temples");
     return await res.json();
   } catch (err) {
@@ -28,7 +42,7 @@ export const createTicket = async (templeId, formData, tickets) => {
       age: formData?.primaryDevotee?.age,
       tickets
     };
-    const response = await axios.post(`${API_URL}/api/payments/checkout`, payload);
+    const response = await axios.post(getApiUrl('/payments/checkout'), payload);
     return response.data?.url || null; // Stripe checkout URL
   } catch (err) {
     const message = err?.response?.data?.message || err?.message || 'Failed to create checkout session';
@@ -44,7 +58,7 @@ export const createTicket = async (templeId, formData, tickets) => {
  */
 export async function incrementVisitor(templeId) {
   try {
-    const res = await fetch(`${BASE_URL}/api/temples/${templeId}/visit`, {
+    const res = await fetch(getApiUrl(`/temples/${templeId}/visit`), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     });
@@ -62,7 +76,7 @@ export async function incrementVisitor(templeId) {
  */
 export async function createCheckoutSession(templeId, tickets) {
   try {
-    const res = await fetch(`${BASE_URL}/api/payments/checkout`, {
+    const res = await fetch(getApiUrl('/payments/checkout'), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ templeId, tickets }),
@@ -81,7 +95,7 @@ export async function createCheckoutSession(templeId, tickets) {
  */
 export async function bookTicket(token, payload) {
   try {
-    const res = await fetch(`${BASE_URL}/api/bookings`, {
+    const res = await fetch(getApiUrl('/bookings'), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -102,7 +116,7 @@ export async function bookTicket(token, payload) {
  */
 export async function createBooking(templeId, formData, tickets) {
   try {
-    const res = await fetch(`${BASE_URL}/api/bookings`, {
+    const res = await fetch(getApiUrl('/bookings'), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ templeId, formData, tickets })
@@ -121,7 +135,7 @@ export async function createBooking(templeId, formData, tickets) {
 export async function getBooking(id) {
   try {
     console.log(`Fetching booking with ID: ${id}`);
-    const res = await fetch(`${BASE_URL}/api/bookings/${id}`);
+    const res = await fetch(getApiUrl(`/bookings/${id}`));
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       console.error(`Failed to fetch booking: ${res.status} ${res.statusText}`, errorData);

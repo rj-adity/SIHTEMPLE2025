@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Download, Home, ArrowRight } from 'lucide-react';
 import Button from '../components/ui/Button';
-import { getBooking } from '../utils/api';
+import { getBooking, getApiUrl } from '../utils/api';
 
 const PaymentSuccess = () => {
   const [sessionId, setSessionId] = useState('');
@@ -24,14 +24,14 @@ const PaymentSuccess = () => {
             setTicket(data);
           } else {
             // Fallback: confirm endpoint
-            fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/payments/confirm?ticket_id=${tid}`)
+            fetch(getApiUrl(`/payments/confirm?ticket_id=${tid}`))
               .then((r) => r.ok ? r.json() : null)
               .then((d) => d && setTicket(d))
               .catch(() => {});
           }
         })
         .catch(() => {
-          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001/api'}/payments/confirm?ticket_id=${tid}`)
+          fetch(getApiUrl(`/payments/confirm?ticket_id=${tid}`))
             .then((r) => r.ok ? r.json() : null)
             .then((d) => d && setTicket(d))
             .catch(() => {});
