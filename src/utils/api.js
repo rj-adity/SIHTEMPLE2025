@@ -120,11 +120,18 @@ export async function createBooking(templeId, formData, tickets) {
  */
 export async function getBooking(id) {
   try {
+    console.log(`Fetching booking with ID: ${id}`);
     const res = await fetch(`${BASE_URL}/api/bookings/${id}`);
-    if (!res.ok) throw new Error("Failed to fetch booking");
-    return await res.json();
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error(`Failed to fetch booking: ${res.status} ${res.statusText}`, errorData);
+      throw new Error(`Failed to fetch booking: ${errorData.message || res.statusText}`);
+    }
+    const data = await res.json();
+    console.log("Booking data received:", data);
+    return data;
   } catch (err) {
-    console.error(err);
-    return null;
+    console.error("Error in getBooking:", err);
+    throw err; // Re-throw to let the calling component handle it
   }
 }
