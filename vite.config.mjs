@@ -10,6 +10,17 @@ export default defineConfig({
   build: {
     outDir: "build",
     chunkSizeWarningLimit: 2000,
+    sourcemap: false,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['@radix-ui/react-slot', 'lucide-react']
+        }
+      }
+    }
   },
   plugins: [tsconfigPaths(), react(), tagger()],
   server: {
